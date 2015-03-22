@@ -10,6 +10,18 @@ var keypress = require('keypress').keypress;
 
 var Editor = React.createClass({
 
+  propTypes: {
+    highlight: React.PropTypes.bool,
+    readOnly: React.PropTypes.bool,
+  },
+
+  getDefaultProps: function() {
+    return {
+      highlight: true,
+      readOnly: false,
+    }
+  },
+
   getValue: function() {
     return this.codeMirror && this.codeMirror.getValue();
   },
@@ -31,7 +43,8 @@ var Editor = React.createClass({
       this.refs.container.getDOMNode(),
       {
         value: this.props.value,
-        lineNumbers: true
+        lineNumbers: true,
+        readOnly: this.props.readOnly
       }
     );
 
@@ -55,41 +68,45 @@ var Editor = React.createClass({
       }
     });
 
-    this._markerRange = null;
-    this._mark = null;
     this._subscriptions.push(
-      PubSub.subscribe('CM.HIGHLIGHT', (_, range) => {
-        var doc = this.codeMirror.getDoc();
-        this._markerRange = range;
-        // We only want one mark at a time.
-        if (this._mark) this._mark.clear();
-        this._mark = this.codeMirror.markText(
-          doc.posFromIndex(range[0]),
-          doc.posFromIndex(range[1]),
-          {className: 'marked'}
-        );
-      }),
-
-      PubSub.subscribe('CM.CLEAR_HIGHLIGHT', (_, range) => {
-        if (!range ||
-          this._markerRange &&
-          range[0] === this._markerRange[0] &&
-          range[1] === this._markerRange[1]
-        ) {
-          this._markerRange = null;
-          if (this._mark) {
-            this._mark.clear();
-            this._mark = null;
-          }
-        }
-      }),
-
       PubSub.subscribe('PANEL_RESIZE', () => {
         if (this.codeMirror) {
           this.codeMirror.refresh();
         }
       })
     );
+
+    if (this.props.highlight) {
+      this._markerRange = null;
+      this._mark = null;
+      this._subscriptions.push(
+        PubSub.subscribe('CM.HIGHLIGHT', (_, range) => {
+          var doc = this.codeMirror.getDoc();
+          this._markerRange = range;
+          // We only want one mark at a time.
+          if (this._mark) this._mark.clear();
+          this._mark = this.codeMirror.markText(
+            doc.posFromIndex(range[0]),
+            doc.posFromIndex(range[1]),
+            {className: 'marked'}
+          );
+        }),
+
+        PubSub.subscribe('CM.CLEAR_HIGHLIGHT', (_, range) => {
+          if (!range ||
+            this._markerRange &&
+            range[0] === this._markerRange[0] &&
+            range[1] === this._markerRange[1]
+          ) {
+            this._markerRange = null;
+            if (this._mark) {
+              this._mark.clear();
+              this._mark = null;
+            }
+          }
+        })
+      );
+    }
   },
 
   componentWillUnmount: function() {
@@ -132,7 +149,7 @@ var Editor = React.createClass({
 
   render: function() {
     return (
-      <div id="Editor" ref="container" />
+      <div className="editor" ref="container" />
     );
   }
 });
