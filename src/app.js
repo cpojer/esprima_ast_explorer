@@ -14,6 +14,7 @@ var React = require('react/addons');
 var Snippet = require('./Snippet');
 var SplitPane = require('./SplitPane');
 var Toolbar = require('./Toolbar');
+var TransformOutput = require('./TransformOutput');
 
 var getFocusPath = require('./getFocusPath');
 var esprima = require('esprima-fb');
@@ -21,6 +22,8 @@ var fs = require('fs');
 var keypress = require('keypress').keypress;
 
 var initialCode = fs.readFileSync(__dirname + '/codeExample.txt', 'utf8');
+var initialTransform =
+  fs.readFileSync(__dirname + '/transformExample.txt', 'utf8');
 
 function updateHashWithIDAndRevision(id, rev) {
   global.location.hash = '/' + id + (rev && rev !== 0 ? '/' + rev : '');
@@ -40,6 +43,7 @@ var App = React.createClass({
       focusPath: [],
       content: revision && revision.get('code') || initialCode,
       snippet: snippet,
+      transformContent: initialTransform,
       revision: revision,
     };
   },
@@ -142,6 +146,13 @@ var App = React.createClass({
     }
   },
 
+  onTransformContentChange: function(data) {
+    var content = data.value;
+    this.setState({
+      transformContent: content
+    });
+  },
+
   onActivity: function(cursorPos) {
     this.setState({
       focusPath: getFocusPath(this.state.ast, cursorPos)
@@ -230,7 +241,7 @@ var App = React.createClass({
         />
         {this.state.error ? <ErrorMessage message={this.state.error} /> : null}
         <SplitPane
-          className="splitpane"
+          className="splitpane splitpane-top"
           onResize={this._onResize}>
           <Editor
             ref="editor"
@@ -239,6 +250,19 @@ var App = React.createClass({
             onActivity={this.onActivity}
           />
           <ASTOutput focusPath={this.state.focusPath} ast={this.state.ast} />
+        </SplitPane>
+        <SplitPane
+          className="splitpane splitpane-bottom"
+          onResize={this._onResize}>
+          <Editor
+            highlight={false}
+            value={this.state.transformContent}
+            onContentChange={this.onTransformContentChange}
+          />
+          <TransformOutput
+            transform={this.state.transformContent}
+            code={this.state.content}
+          />
         </SplitPane>
       </PasteDropTarget>
     );

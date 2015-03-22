@@ -1,0 +1,9 @@
+module.exports = function(file, source) {
+  var root = j(source);
+  root.find(j.Identifier).forEach(function(p) {
+    var reverseName = p.value.name.split('').reverse().join('');
+    j(p).replaceWith(j.identifier(reverseName));
+  });
+
+  return root.toSource();
+};
