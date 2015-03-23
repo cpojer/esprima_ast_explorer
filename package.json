@@ -23,7 +23,8 @@
     "keypress": "git://github.com/dmauro/Keypress",
     "pubsub-js": "^1.4.2",
     "react": "^0.13.1",
-    "react-tools": "^0.12.x"
+    "react-tools": "^0.12.x",
+    "babel": "*"
   },
   "browserify": {
     "transform": [
