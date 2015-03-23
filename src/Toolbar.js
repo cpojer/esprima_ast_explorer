@@ -13,6 +13,7 @@ var Toolbar = React.createClass({
     forking: React.PropTypes.bool,
     onSave: React.PropTypes.func,
     onFork: React.PropTypes.func,
+    onRun: React.PropTypes.func
   },
 
   render: function() {
@@ -52,6 +53,23 @@ var Toolbar = React.createClass({
             })}
           />
           Fork
+        </button>
+        <button
+          type="button"
+          disabled ={
+            this.props.saving || this.props.forking
+          }
+          onClick={this.props.onRun}>
+          <i
+            className={cx({
+              fa: true,
+              'fa-play': true,
+              'fa-spinner': this.props.forking,
+              'fa-lg': true,
+              'fa-fw': true,
+            })}
+          />
+          Run
         </button>
         <div id="parser">
           Parser: esprima-fb-{esprima.version}
