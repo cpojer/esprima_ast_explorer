@@ -15,6 +15,7 @@ var Snippet = require('./Snippet');
 var SplitPane = require('./SplitPane');
 var Toolbar = require('./Toolbar');
 var TransformOutput = require('./TransformOutput');
+var babel = require('babel');
 
 var getFocusPath = require('./getFocusPath');
 var esprima = require('esprima-fb');
@@ -189,7 +190,15 @@ var App = React.createClass({
       }.bind(this)
     );
   },
-
+  _onRun: function() {
+    var content = this.state.content;
+    try{
+      var code = babel.transform(content).code
+      eval(code)
+    } catch(O_o){
+      console.error('Error: ', O_o);
+    }
+  },
   _onSave: function() {
     var revision = this.state.revision;
     if (this.state.content !== initialCode && !revision ||
@@ -233,6 +242,7 @@ var App = React.createClass({
           saving={this.state.saving}
           onSave={this._onSave}
           onFork={this._onFork}
+          onRun={this._onRun}
           canSave={
             this.state.content !== initialCode && !revision ||
             revision && revision.get('code') !== this.state.content
